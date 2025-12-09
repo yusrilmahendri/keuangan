@@ -18,14 +18,14 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            cd ~/domains/pioneersolve.id/public_html/cloud-api-management
+            cd ~/domains/pioneersolve.id/public_html/money
 
             echo "🧹 Resetting local changes..."
             git fetch --all
-            git reset --hard origin/develop
+            git reset --hard origin/main
 
             echo "📦 Pulling latest code..."
-            git pull origin develop
+            git pull origin main
 
             echo "📦 Running Composer Install..."
             composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
