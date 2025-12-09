@@ -1,4 +1,4 @@
-name: 🚀 Remote Git Deploy to Hostinger
+name: 🚀 Remote Git Deployment to Hostinger
 
 on:
   push:
@@ -8,7 +8,6 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
       - name: 🔐 Deploy to Hostinger via SSH
         uses: appleboy/ssh-action@v1.0.0
