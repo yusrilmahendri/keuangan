@@ -1,4 +1,4 @@
-name: 🚀 Remote Git Deployment to Hostinger
+name: 🚀 Remote Git Deploy to Hostinger
 
 on:
   push:
