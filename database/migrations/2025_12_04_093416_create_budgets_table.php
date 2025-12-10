@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('budgets', function (Blueprint $table) {
             $table->id();
-            $table->decimal('amount', 15, 2);
-            $table->decimal('amount_saldo', 15, 2)->default(0)->nullable();
+            $table->decimal('amount', 15, 2)->default(0);   
+            $table->decimal('amount_saldo', 15, 2)->default(0)->default(0);
             $table->date('periode');
             $table->string('description')->nullable();
             $table->timestamps();
