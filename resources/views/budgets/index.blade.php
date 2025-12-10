@@ -11,9 +11,9 @@
                     <h2 class="font-weight-bold text-primary">
                         Rp {{ number_format($total_saldo, 0, ',', '.') }}
                     </h2>
-
                     <p class="mb-0 text-muted">
-                        Update terakhir: {{ \Carbon\Carbon::parse($updated_saldo->periode)->format('d M Y') }}
+                        Update terakhir:  
+                        {{ $updated_saldo ? \Carbon\Carbon::parse($updated_saldo->periode)->format('d M Y') : '-' }}
                     </p>
                 </div>
             </div>

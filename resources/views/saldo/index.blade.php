@@ -14,9 +14,10 @@
                     </h2>
 
                     <p class="mb-0 text-muted">
-                        Update terakhir:  {{ \Carbon\Carbon::parse($updated_saldo->periode_saldo)->format('d M Y') }}
+                        Update terakhir:  
+                        {{ $updated_saldo ? \Carbon\Carbon::parse($updated_saldo->periode_saldo)->format('d M Y') : '-' }}
                     </p>
-                    
+                                        
                 </div>
             </div>
         </div>
