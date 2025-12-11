@@ -131,13 +131,13 @@ class TransactionsController extends Controller
             $notaFile = $request->file('nota')->store('nota', 'public');
         }
 
-        // Hapus format Rupiah dari total
-        $total = preg_replace('/[Rp\s\.]/', '', $request->total);
+        // Hapus format Rupiah dari amount
+        $amount = preg_replace('/[Rp\s\.]/', '', $request->amount);
 
         // Simpan transaksi utama
         $trx = Transaction::create([
             'category_id' => $request->category_id,
-            'total' => $total, // sudah bersih
+            'amount' => $amount, // sudah bersih
             'transaction_date'  => $request->date,
             'description' => $request->description,
             'nota'  => $notaFile
@@ -211,7 +211,7 @@ public function update(Request $request, $id)
         // ==========================
         // FORMAT TOTAL → ANGKA
         // ==========================
-        $amount = preg_replace('/[^0-9]/', '', $validated['total']);
+        $amount = preg_replace('/[^0-9]/', '', $validated['amount']);
 
         // ==========================
         // UPDATE TRANSAKSI
