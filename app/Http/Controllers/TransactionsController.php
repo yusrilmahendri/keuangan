@@ -94,7 +94,7 @@ class TransactionsController extends Controller
 
         // Sisa budget
         $sisaBudget = $totalBudget - $totalSemua;
-        $updated_saldo = Budget::orderBy('periode', 'desc')->first() ?? '-';
+        $updated_saldo = Budget::orderBy('periode', 'desc')->first();
         $dateTransaksi = Transaction::latest()->first();
   
         return view('transactions.index', [

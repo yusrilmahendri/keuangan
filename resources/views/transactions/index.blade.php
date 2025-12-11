@@ -30,10 +30,11 @@
                         Rp {{ number_format($totalSemua, 0, ',', '.') }}
                     </h2>
 
-                 <p class="mb-0 text-muted">
-                    Update terakhir:  
-                    {{ $updated_saldo ? \Carbon\Carbon::parse($updated_saldo)->format('d M Y') : '-' }}
-                </p>
+                    <p class="mb-0 text-muted">
+                        Update terakhir:  
+                        {{ optional($updated_saldo?->periode ? \Carbon\Carbon::parse($updated_saldo->periode) : null)
+                            ?->format('d M Y') ?? '-' }}
+                    </p>
                 </div>
             </div>
         </div>
