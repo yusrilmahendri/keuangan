@@ -195,7 +195,6 @@ public function update(Request $request, $id)
     // ==========================
     $validated = $request->validate([
         'category_id' => 'required|exists:categories,id',
-        'amount' => 'required|string',
         'description' => 'nullable|string',
         'date' => 'required|date',
 

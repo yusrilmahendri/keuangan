@@ -33,7 +33,7 @@
                                         <div class="form-group">
                                             <label>Total Transaksi</label>
                                             <input type="text" class="form-control"
-                                                name="total"
+                                                name="amount"
                                                 id="total_transaksi"
                                                 value="Rp {{ number_format($transaction->amount, 0, ',', '.') }}">
                                         </div>
