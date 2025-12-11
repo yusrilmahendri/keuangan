@@ -8,7 +8,7 @@ use App\Models\Budget;
 
 class Category extends Model
 {
-     protected $guarded = [''];
+     protected $fillable = ['id', 'name'];
 
     public function transactions(){
         return $this->hasMany(Transaction::class);
