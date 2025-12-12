@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('transaction_id');   
             $table->string('name');
-            $table->integer('quantity');
+            $table->string('quantity');
             $table->decimal('price', 15, 2);
             $table->string('note')->nullable();
             $table->timestamps();

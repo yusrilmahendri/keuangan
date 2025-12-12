@@ -62,7 +62,7 @@
                                                 </div>
 
                                                 <div class="col-md-2">
-                                                    <input type="number" name="items[0][quantity]" class="form-control item-jumlah"
+                                                    <input type="text" name="items[0][quantity]" class="form-control item-jumlah"
                                                         placeholder="Jumlah" min="1">
                                                 </div>
 
@@ -145,7 +145,7 @@
                 adaDetail = true;
             }
 
-            total += harga + jumlah; // sesuai permintaan user
+            total += harga; // sesuai permintaan user
         });
 
         const totalInput = document.getElementById('total_transaksi');
@@ -172,7 +172,7 @@
             </div>
 
             <div class="col-md-2">
-                <input type="number" name="items[${itemIndex}][quantity]" class="form-control item-jumlah" placeholder="Jumlah" min="1">
+                <input type="string" name="items[${itemIndex}][quantity]" class="form-control item-jumlah" placeholder="Jumlah" min="1">
             </div>
 
             <div class="col-md-2">
@@ -229,9 +229,9 @@
             hitungTotal();
         }
 
-        if (e.target.classList.contains('item-jumlah')) {
-            hitungTotal();
-        }
+        // if (e.target.classList.contains('item-jumlah')) {
+        //     hitungTotal();
+        // }
     });
 
     // Format total manual

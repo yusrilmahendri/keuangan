@@ -202,7 +202,7 @@ class TransactionsController extends Controller
             'items' => 'nullable|array',
             'items.*.id' => 'nullable|integer',
             'items.*.name' => 'nullable|string',
-            'items.*.quantity' => 'nullable|numeric|min:1',
+            'items.*.quantity' => 'nullable',
             'items.*.price' => 'nullable|string',
             'items.*.note' => 'nullable|string',
         ]);
