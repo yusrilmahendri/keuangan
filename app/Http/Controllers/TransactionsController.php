@@ -131,13 +131,13 @@ class TransactionsController extends Controller
             $notaFile = $request->file('nota')->store('nota', 'public');
         }
 
-        // Hapus format Rupiah dari amount
-        $amount = preg_replace('/[Rp\s\.]/', '', $request->amount);
+        // Hapus format Rupiah dari total
+        $total = preg_replace('/[Rp\s\.]/', '', $request->total);
 
         // Simpan transaksi utama
         $trx = Transaction::create([
             'category_id' => $request->category_id,
-            'amount' => $amount, // sudah bersih
+            'total' => $total, // sudah bersih
             'transaction_date'  => $request->date,
             'description' => $request->description,
             'nota'  => $notaFile
@@ -186,110 +186,124 @@ class TransactionsController extends Controller
     /**
      * Update the specified resource in storage.
      */
-public function update(Request $request, $id)
-{
-    $transaction = Transaction::with('items')->findOrFail($id);
-
-    // ==========================
-    // VALIDASI
-    // ==========================
-    $validated = $request->validate([
-        'category_id' => 'required|exists:categories,id',
-        'description' => 'nullable|string',
-        'date' => 'required|date',
-
-        'items' => 'required|array',
-        'items.*.name' => 'required|string',
-        'items.*.quantity' => 'required|numeric|min:1',
-        'items.*.price' => 'required|string',
-        'items.*.note' => 'nullable|string',
-    ]);
-
-    DB::beginTransaction();
-    try {
+    public function update(Request $request, $id)
+    {
+        $transaction = Transaction::with('items')->findOrFail($id);
 
         // ==========================
-        // FORMAT TOTAL → ANGKA
+        // VALIDASI
         // ==========================
-        $amount = preg_replace('/[^0-9]/', '', $validated['amount']);
+        $validated = $request->validate([
+            'category_id' => 'required|exists:categories,id',
+            'total' => 'required|string',
+            'description' => 'nullable|string',
+            'date' => 'required|date',
 
-        // ==========================
-        // UPDATE TRANSAKSI
-        // ==========================
-        $transaction->update([
-            'category_id' => $validated['category_id'],
-            'amount' => $amount,
-            'description' => $validated['description'],
-            'transaction_date' => $validated['date'],
+            'items' => 'nullable|array',
+            'items.*.id' => 'nullable|integer',
+            'items.*.name' => 'nullable|string',
+            'items.*.quantity' => 'nullable|numeric|min:1',
+            'items.*.price' => 'nullable|string',
+            'items.*.note' => 'nullable|string',
         ]);
 
-        // ==========================
-        // HANDLING NOTA UPLOAD
-        // ==========================
-        if ($request->hasFile('nota')) {
+        DB::beginTransaction();
 
-            if ($transaction->nota) {
-                Storage::delete($transaction->nota);
+        try {
+            // FORMAT TOTAL
+            $amount = preg_replace('/[^0-9]/', '', $validated['total']);
+
+            // UPDATE TRANSAKSI
+            $transaction->update([
+                'category_id' => $validated['category_id'],
+                'amount' => $amount,
+                'description' => $validated['description'] ?? null,
+                'transaction_date' => $validated['date'],
+            ]);
+
+            // HANDLING NOTA
+            if ($request->hasFile('nota')) {
+                if ($transaction->nota) {
+                    Storage::disk('public')->delete($transaction->nota);
+                }
+
+                $notaPath = $request->file('nota')->store('nota', 'public');
+                $transaction->update(['nota' => $notaPath]);
             }
 
-            $notaPath = $request->file('nota')->store('nota');
-            $transaction->update(['nota' => $notaPath]);
-        }
+            // ======================================
+            // FIX UTAMA: HANDLE JIKA ITEMS KOSONG
+            // ======================================
+            if (!isset($validated['items']) || count($validated['items']) === 0) {
 
-        // ==========================
-        // PROSES ITEMS
-        // ==========================
+                // Hapus semua item lama
+                $transaction->items()->delete();
 
-        $existingIds = $transaction->items->pluck('id')->toArray();
-        $requestIds = collect($validated['items'])->pluck('id')->filter()->toArray();
-
-        // --- HAPUS ITEM YANG DIHAPUS DI FORM
-        $idsToDelete = array_diff($existingIds, $requestIds);
-        TransactionItem::whereIn('id', $idsToDelete)->delete();
-
-        // --- UPDATE ATAU INSERT ITEM BARU
-        foreach ($validated['items'] as $item) {
-
-            // Format harga → angka
-            $price = preg_replace('/[^0-9]/', '', $item['price']);
-
-            if (isset($item['id'])) {
-
-                // UPDATE ITEM LAMA
-                TransactionItem::where('id', $item['id'])->update([
-                    'name' => $item['name'],
-                    'quantity' => $item['quantity'],
-                    'price' => $price,
-                    'note' => $item['note'] ?? null
-                ]);
-
-            } else {
-
-                // INSERT ITEM BARU
-                $transaction->items()->create([
-                    'name' => $item['name'],
-                    'quantity' => $item['quantity'],
-                    'price' => $price,
-                    'note' => $item['note'] ?? null,
-                ]);
+                DB::commit();
+                return redirect()
+                    ->route('transactions.index')
+                    ->with('success', 'Transaction updated successfully (without items)!');
             }
+
+            // ======================================
+            // PROSES ITEMS JIKA ADA
+            // ======================================
+
+            $existingIds = $transaction->items->pluck('id')->toArray();
+
+            $requestIds = collect($validated['items'])
+                ->pluck('id')
+                ->filter()
+                ->toArray();
+
+            // HAPUS ITEM LAMA YANG DI REMOVE
+            $idsToDelete = array_diff($existingIds, $requestIds);
+            TransactionItem::whereIn('id', $idsToDelete)->delete();
+
+            // UPDATE / INSERT item baru
+            foreach ($validated['items'] as $item) {
+
+                // Convert harga
+                $price = isset($item['price'])
+                    ? preg_replace('/[^0-9]/', '', $item['price'])
+                    : 0;
+
+                // Update item lama
+                if (isset($item['id'])) {
+                    TransactionItem::where('id', $item['id'])->update([
+                        'name' => $item['name'] ?? null,
+                        'quantity' => $item['quantity'] ?? null,
+                        'price' => $price,
+                        'note' => $item['note'] ?? null,
+                    ]);
+                }
+
+                // Insert item baru
+                else {
+                    $transaction->items()->create([
+                        'name' => $item['name'] ?? null,
+                        'quantity' => $item['quantity'] ?? null,
+                        'price' => $price,
+                        'note' => $item['note'] ?? null,
+                    ]);
+                }
+            }
+
+            DB::commit();
+
+            return redirect()
+                ->route('transactions.index')
+                ->with('success', 'Transaction updated successfully!');
+
+        } catch (\Exception $e) {
+
+            DB::rollBack();
+
+            return back()->withErrors([
+                'error' => $e->getMessage()
+            ]);
         }
-
-        DB::commit();
-
-        return redirect()
-            ->route('transactions.index')
-            ->with('success', 'Transaction updated successfully!');
-
-    } catch (\Exception $e) {
-
-        DB::rollBack();
-
-        return back()->withErrors([
-            'error' => $e->getMessage()
-        ]);
     }
-}
 
     /**
      * Remove the specified resource from storage.

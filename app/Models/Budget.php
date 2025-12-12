@@ -11,6 +11,6 @@ class Budget extends Model
     /** @use HasFactory<\Database\Factories\BudgetFactory> */
     use HasFactory;
 
-    protected $guarded = [''];
+    protected $fillable = ['amount', 'amount_saldo', 'periode', 'description'];
 
 }

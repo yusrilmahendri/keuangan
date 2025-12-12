@@ -13,7 +13,8 @@
                             <div class="row">
                                 <div class="col-lg-12">
 
-                                    <form action="{{ route('transactions.update', $transaction->id) }}" method="POST" enctype="multipart/form-data">
+                                    <form action="{{ route('transactions.update', $transaction->id) }}" 
+                                          method="POST" enctype="multipart/form-data">
                                       
                                         @csrf
                                         @method('PUT')
@@ -32,23 +33,27 @@
 
                                         <div class="form-group">
                                             <label>Total Transaksi</label>
-                                            <input type="text" class="form-control"
-                                                name="amount"
+                                            <input type="text" 
+                                                class="form-control"
+                                                name="total"
                                                 id="total_transaksi"
                                                 value="Rp {{ number_format($transaction->amount, 0, ',', '.') }}">
                                         </div>
 
                                         <div class="form-group">
                                             <label>Keterangan / Catatan</label>
-                                            <input type="text" class="form-control"
+                                            <input type="text" 
+                                                class="form-control"
                                                 name="description" 
                                                 value="{{ $transaction->description }}">
                                         </div>
 
                                         <div class="form-group">
                                             <label>Tanggal / Waktu Transaksi</label>
-                                            <input type="date" class="form-control"
-                                                name="date" value="{{ \Carbon\Carbon::parse($transaction->transaction_date)->format('Y-m-d') }}">
+                                            <input type="date" 
+                                                class="form-control"
+                                                name="date" 
+                                                value="{{ \Carbon\Carbon::parse($transaction->transaction_date)->format('Y-m-d') }}">
                                         </div>
 
                                         <div class="form-group">
@@ -63,7 +68,7 @@
                                         <div id="detail-container">
 
                                             @foreach($transaction->items as $i => $item)
-                                            <div class="row item-row mb-2"  style="margin-top:15px;">
+                                            <div class="row item-row mb-2" style="margin-top:15px;">
 
                                                 <input type="hidden" name="items[{{ $i }}][id]" value="{{ $item->id }}">
 
@@ -91,7 +96,7 @@
                                                 <div class="col-md-3">
                                                     <input type="text" name="items[{{ $i }}][note]"
                                                         value="{{ $item->note }}"
-                                                        class="form-control item-ket"
+                                                        class="form-control"
                                                         placeholder="Keterangan (opsional)">
                                                 </div>
 
@@ -128,14 +133,10 @@
 
 @endsection
 
-
 @push('scripts')
 <script>
-
-    // FORMAT RUPIAH
     function formatRupiah(angka) {
         angka = angka.replace(/[^,\d]/g, '').toString();
-
         let split = angka.split(',');
         let sisa = split[0].length % 3;
         let rupiah = split[0].substr(0, sisa);
@@ -146,36 +147,29 @@
             rupiah += separator + ribuan.join('.');
         }
 
-        rupiah = split[1] != undefined ? rupiah + ',' + split[1] : rupiah;
-
         return rupiah ? 'Rp ' + rupiah : '';
     }
 
-    // HITUNG TOTAL = jumlah semua harga
     function hitungTotal() {
         let total = 0;
-
         document.querySelectorAll('.item-harga').forEach(input => {
             let angka = parseFloat(input.value.replace(/[^0-9]/g, '')) || 0;
             total += angka;
         });
-
         document.getElementById('total_transaksi').value = formatRupiah(total.toString());
     }
 
-    // INDEX DINAMIS
     let itemIndex = {{ count($transaction->items) }};
 
     function generateRow() {
         return `
         <div class="row item-row mb-2" style="margin-top:15px;">
-
             <div class="col-md-3">
-                <input type="text" name="items[${itemIndex}][name]" class="form-control item-nama" placeholder="Nama Barang">
+                <input type="text" name="items[${itemIndex}][name]" class="form-control" placeholder="Nama Barang">
             </div>
 
             <div class="col-md-2">
-                <input type="number" name="items[${itemIndex}][quantity]" class="form-control item-jumlah" placeholder="Jumlah" min="1">
+                <input type="number" name="items[${itemIndex}][quantity]" class="form-control" placeholder="Jumlah" min="1">
             </div>
 
             <div class="col-md-2">
@@ -183,7 +177,7 @@
             </div>
 
             <div class="col-md-3">
-                <input type="text" name="items[${itemIndex}][note]" class="form-control item-ket" placeholder="Keterangan">
+                <input type="text" name="items[${itemIndex}][note]" class="form-control" placeholder="Keterangan">
             </div>
 
             <div class="col-md-2 d-flex" style="margin-top:5px;">
@@ -193,13 +187,10 @@
         </div>`;
     }
 
-    // ADD & REMOVE ROW
     document.getElementById('detail-container').addEventListener('click', function(e) {
-
         if (e.target.classList.contains('btn-add')) {
             itemIndex++;
             document.getElementById('detail-container').insertAdjacentHTML('beforeend', generateRow());
-            kontrolHapus();
         }
 
         if (e.target.classList.contains('btn-remove')) {
@@ -207,38 +198,22 @@
                 e.target.closest('.item-row').remove();
                 hitungTotal();
             }
-            kontrolHapus();
         }
     });
 
-    function kontrolHapus() {
-        let rows = document.querySelectorAll('.item-row');
-        rows.forEach(row => {
-            row.querySelector('.btn-remove').disabled = (rows.length === 1);
-        });
-    }
-    kontrolHapus();
-
-    // EVENT INPUT
     document.addEventListener('input', function(e) {
-
         if (e.target.classList.contains('item-harga')) {
             e.target.value = formatRupiah(e.target.value);
             hitungTotal();
         }
     });
 
-    // JALANKAN SAAT PAGE LOAD — supaya total langsung muncul
     document.addEventListener("DOMContentLoaded", function() {
-
-        // Format ulang harga
         document.querySelectorAll('.item-harga').forEach(input => {
             let angka = input.value.replace(/[^0-9]/g, '');
             input.value = formatRupiah(angka);
         });
-
-        hitungTotal(); // hitung total pertama kali
+        hitungTotal();
     });
-
 </script>
 @endpush
