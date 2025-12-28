@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 use App\Models\Saldo;
+use App\Models\Category;
 
 class SaldoController extends Controller
 {   
@@ -14,6 +15,9 @@ class SaldoController extends Controller
         $saldo = Saldo::orderBy('periode_saldo', 'desc');
 
         return DataTables::of($saldo)
+            ->addColumn('category', function ($model) {
+                return $model->category ? $model->category->name : '-';
+            })
             ->addColumn('amount', function ($model) {
                 return 'Rp ' . number_format($model->amount, 0, ',', '.');
             })
@@ -104,6 +108,7 @@ class SaldoController extends Controller
         return view('saldo.edit', [
             'title' => 'Edit Saldo',
             'Saldo' => Saldo::findOrFail($id),
+            'categories' => Category::all(),
         ]);
     }
 
@@ -116,6 +121,7 @@ class SaldoController extends Controller
             'amount' => 'required',
             'description' => 'required|max:255',
             'periode_saldo' => 'required|date',
+            'category_id' => 'required',
         ]);
             
         $saldo = Saldo::findOrFail($id);
@@ -123,6 +129,7 @@ class SaldoController extends Controller
             'amount' => $this->cleanRupiah($validatedData['amount']),
             'description' => $validatedData['description'],
             'periode_saldo' => $validatedData['periode_saldo'],
+            'category_id' => $validatedData['category_id'],
         ]);
 
         return redirect()->route('saldos.index')->with('info', 'Saldo berhasil diperbarui!');

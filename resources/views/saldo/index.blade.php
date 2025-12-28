@@ -39,6 +39,7 @@
             <table class="table table-bordered table-hover" id="dataTable">
                 <thead>
                     <tr>
+                        <th>Kategori</th>
                         <th>Saldo</th>
                         <th>Keterangan</th>
                         <th>Tanggal & Waktu Input</th>
@@ -74,6 +75,7 @@
                 serverSide: true,
                 ajax: "{{ route('saldos.data') }}",
                 columns: [
+                    {data: 'category'},
                     {data: 'amount'},
                     {data: 'description'},
                     {data: 'periode_saldo'},

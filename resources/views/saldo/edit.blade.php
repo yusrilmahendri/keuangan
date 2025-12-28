@@ -28,6 +28,18 @@
                          autofocus/>
                     </div>
 
+                    <div class="form-group @error('category_id') has-error @enderror">
+                        <label for="category_id">Kategori Saldo</label>
+                        <select class="form-control" name="category_id" id="category_id">
+                            <option value="">-- Pilih Kategori --</option>
+                            @foreach($categories as $category)
+                                <option value="{{ $category->id }}" {{ old('category_id', $Saldo->category_id) == $category->id ? 'selected' : '' }}>
+                                    {{ $category->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
                     <div class="form-group @error('description') has-error @enderror">
                         <label for="description">Keterangan / Catatan</label>
                         <input type="text" 

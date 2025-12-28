@@ -4,15 +4,29 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Category;
+use Yajra\DataTables\Facades\DataTables;
 
 class CategoryController extends Controller
 {
+    public function data()
+    {
+        $categories = Category::orderBy('name', 'asc');
+
+        return DataTables::of($categories)
+            ->addColumn('action', 'category.action')
+            ->addIndexColumn()
+            ->rawColumns(['action'])
+            ->toJson();
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        //
+        return view('category.index', [
+            'title' => 'Kategori Saldo',
+        ]);
     }
 
     /**
