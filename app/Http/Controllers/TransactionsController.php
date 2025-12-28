@@ -6,24 +6,19 @@ use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 use App\Models\Transaction;
 use App\Models\TransactionItem;
+use App\Models\Saldo;
 use Illuminate\Support\Facades\DB;
 use App\Service\BudgetService;
-use App\Models\Budget;
-use App\Models\Category;
 use Illuminate\Support\Facades\Storage;
+use App\Exports\TransactionExport;
+use Maatwebsite\Excel\Facades\Excel;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class TransactionsController extends Controller
 {   
-    protected $budgetService;
-    public function __construct(BudgetService $budgetService)
-    {
-        $this->budgetService = $budgetService;
-    }
-
     public function data()
     {
-        $transactions = Transaction::with(['category', 'items'])
-            ->orderBy('transaction_date', 'desc');
+        $transactions = Transaction::orderBy('transaction_date', 'desc');
 
         return DataTables::of($transactions)
             ->addColumn('name', function (Transaction $model) {
@@ -61,9 +56,14 @@ class TransactionsController extends Controller
                 return 'Rp ' . number_format($row->amount, 0, ',', '.');
             })
 
-            // FORMAT TANGGAL KE Y-m-d
+            // FORMAT DESCRIPTION
+            ->editColumn('description', function ($row) {
+                return $row->description ?: '-';
+            })
+
+            // FORMAT TANGGAL KE d M Y
             ->editColumn('transaction_date', function ($row) {
-                return \Carbon\Carbon::parse($row->transaction_date)->format('Y-m-d');
+                return \Carbon\Carbon::parse($row->transaction_date)->format('d M Y');
             })
 
 
@@ -80,8 +80,8 @@ class TransactionsController extends Controller
      */
     public function index()
     {
-        // Total budget dari service
-        $totalBudget = $this->budgetService->getTotalBudget();
+        // Total saldo dari tabel saldos
+        $totalSaldo = Saldo::sum('amount');
 
         // Total amount dari tabel transactions
         $totalAmount = Transaction::sum('amount');
@@ -93,9 +93,8 @@ class TransactionsController extends Controller
         // Total keseluruhan amount + price
         $totalSemua = $totalAmount + $totalPrice;
 
-        // Sisa budget
-        $sisaBudget = $totalBudget - $totalSemua;
-        $updated_saldo = Budget::orderBy('periode', 'desc')->first();
+        // Sisa saldo (saldo - total transaksi)
+        $sisaSaldo = $totalSaldo - $totalSemua;
         $dateTransaksi = Transaction::latest()->first();
   
         return view('transactions.index', [
@@ -105,8 +104,8 @@ class TransactionsController extends Controller
             'totalAmount' => $totalAmount,
             'totalPrice' => $totalPrice,
             'totalSemua' => $totalSemua,
-            'sisaBudget' => $sisaBudget,
-            'updated_saldo' => $updated_saldo,
+            'totalSaldo' => $totalSaldo,
+            'sisaSaldo' => $sisaSaldo,
         ]);
     }
     /**
@@ -115,7 +114,6 @@ class TransactionsController extends Controller
     public function create()
     {
         return view('transactions.create', [
-            'categories' => Category::all(),
             'title' => 'Tambah Transaksi',
         ]);
     }
@@ -136,8 +134,7 @@ class TransactionsController extends Controller
 
         // Simpan transaksi utama
         $trx = Transaction::create([
-            'category_id' => $request->category_id,
-            'total' => $total, // sudah bersih
+            'amount' => $total, // sudah bersih
             'transaction_date'  => $request->date,
             'description' => $request->description,
             'nota'  => $notaFile
@@ -179,7 +176,6 @@ class TransactionsController extends Controller
     {
         return view('transactions.edit', [
             'transaction' => Transaction::with('items')->findOrFail($id),
-            'categories' => Category::all(),
         ]);
     }
 
@@ -194,8 +190,7 @@ class TransactionsController extends Controller
         // VALIDASI
         // ==========================
         $validated = $request->validate([
-            'category_id' => 'required|exists:categories,id',
-            'total' => 'required|string',
+            'amount' => 'required|string',
             'description' => 'nullable|string',
             'date' => 'required|date',
 
@@ -211,11 +206,10 @@ class TransactionsController extends Controller
 
         try {
             // FORMAT TOTAL
-            $amount = preg_replace('/[^0-9]/', '', $validated['total']);
+            $amount = preg_replace('/[^0-9]/', '', $validated['amount']);
 
             // UPDATE TRANSAKSI
             $transaction->update([
-                'category_id' => $validated['category_id'],
                 'amount' => $amount,
                 'description' => $validated['description'] ?? null,
                 'transaction_date' => $validated['date'],
@@ -306,10 +300,47 @@ class TransactionsController extends Controller
     }
 
     /**
+     * Export transactions to Excel
+     */
+    public function exportExcel()
+    {
+        return Excel::download(new TransactionExport, 'data-transaksi-' . date('Y-m-d') . '.xlsx');
+    }
+
+    /**
+     * Export transactions to PDF
+     */
+    public function exportPdf()
+    {
+        $transactions = Transaction::with(['category', 'items'])->orderBy('transaction_date', 'desc')->get();
+        $totalTransaksi = Transaction::sum('amount');
+
+        $pdf = Pdf::loadView('transactions.pdf', [
+            'transactions' => $transactions,
+            'totalTransaksi' => $totalTransaksi,
+        ]);
+
+        return $pdf->download('data-transaksi-' . date('Y-m-d') . '.pdf');
+    }
+
+    /**
      * Remove the specified resource from storage.
      */
     public function destroy(string $id)
     {
-        //
+        $transaction = Transaction::findOrFail($id);
+        
+        // Hapus file nota jika ada
+        if ($transaction->nota) {
+            Storage::disk('public')->delete($transaction->nota);
+        }
+        
+        // Hapus transaction items (cascade delete)
+        $transaction->items()->delete();
+        
+        // Hapus transaction
+        $transaction->delete();
+        
+        return redirect()->route('transactions.index')->with('success', 'Transaksi berhasil dihapus!');
     }
 }

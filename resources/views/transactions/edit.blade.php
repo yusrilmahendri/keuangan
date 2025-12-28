@@ -19,23 +19,13 @@
                                         @csrf
                                         @method('PUT')
 
-                                        <div class="form-group">
-                                            <label>Kategori Transaksi</label>
-                                            <select class="form-control" name="category_id" required>
-                                                @foreach($categories as $category)
-                                                    <option value="{{ $category->id }}" 
-                                                        {{ $category->id == $transaction->category_id ? 'selected' : '' }}>
-                                                        {{ $category->name }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
-                                        </div>
+                                    
 
                                         <div class="form-group">
                                             <label>Total Transaksi</label>
                                             <input type="text" 
                                                 class="form-control"
-                                                name="total"
+                                                name="amount"
                                                 id="total_transaksi"
                                                 value="Rp {{ number_format($transaction->amount, 0, ',', '.') }}">
                                         </div>
@@ -80,10 +70,10 @@
                                                 </div>
 
                                                 <div class="col-md-2">
-                                                    <input type="number" name="items[{{ $i }}][quantity]"
+                                                    <input type="text" name="items[{{ $i }}][quantity]"
                                                         value="{{ $item->quantity }}"
                                                         class="form-control item-jumlah"
-                                                        placeholder="Jumlah" min="1">
+                                                        placeholder="Jumlah">
                                                 </div>
 
                                                 <div class="col-md-2">
@@ -169,7 +159,7 @@
             </div>
 
             <div class="col-md-2">
-                <input type="number" name="items[${itemIndex}][quantity]" class="form-control" placeholder="Jumlah" min="1">
+                <input type="text" name="items[${itemIndex}][quantity]" class="form-control" placeholder="Jumlah">
             </div>
 
             <div class="col-md-2">

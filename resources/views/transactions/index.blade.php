@@ -2,27 +2,27 @@
 
 @section('content')
 
-      <div class="row mt-5 justify-content-center" style="margin-top: 25px;">
-        <div class="col-lg-4 col-md-6 col-sm-12" style="margin-left: 20px; margin-right: 20px; margin-top: 20px; width: calc(50% - 40px);">
-            <div class="card shadow-lg sm-6 md-8 lg-12" style="border: 2px solid #f0f0f0; box-shadow: 0px 2px 8px rgba(0,0,0,0.05); border-radius: 12px; ">
-                <div class="card-body text-md-left" style="border: none; margin-left: 15px;">
+      <div class="row mt-5 justify-content-center" style="margin-top: 40px; padding-left: 15px; padding-right: 15px;">
+        <div class="col-lg-6 col-md-6 col-sm-12" style="margin-bottom: 20px; padding-left: 10px; padding-right: 10px; margin-top: 20px;">
+            <div class="card shadow-lg" style="border: 2px solid #f0f0f0; box-shadow: 0px 2px 8px rgba(0,0,0,0.05); border-radius: 12px;">
+                <div class="card-body text-md-left" style="border: none; padding: 25px;">
                     
-                    <h5 class="card-title text-muted">Total Sisa Saldo Budget</h5>
+                    <h5 class="card-title text-muted">Total Sisa Saldo</h5>
 
                     <h2 class="font-weight-bold text-primary">
-                        Rp {{ number_format($sisaBudget, 0, ',', '.') }}
+                        Rp {{ number_format($sisaSaldo, 0, ',', '.') }}
                     </h2>
 
                    <p class="mb-0 text-muted">
-                        Update terakhir: {{ \Carbon\Carbon::parse($updated_saldo->periode)->format('d M Y') }}
+                        Update terakhir: {{ $dateTransaksi ? \Carbon\Carbon::parse($dateTransaksi->transaction_date)->format('d M Y') : '-' }}
                     </p>
                 </div>
             </div>
         </div>
 
-           <div class="col-lg-4 col-md-6 col-sm-12" style="margin-left: 20px; margin-right: 20px; margin-top: 20px; width: calc(50% - 40px);">
-            <div class="card shadow-lg sm-6 md-8 lg-12" style="border: 2px solid #f0f0f0; box-shadow: 0px 2px 8px rgba(0,0,0,0.05); border-radius: 12px; ">
-                <div class="card-body text-md-left" style="border: none; margin-left: 15px;">
+           <div class="col-lg-6 col-md-6 col-sm-12" style="margin-bottom: 20px; padding-left: 10px; padding-right: 10px;  margin-top: 20px;">
+            <div class="card shadow-lg" style="border: 2px solid #f0f0f0; box-shadow: 0px 2px 8px rgba(0,0,0,0.05); border-radius: 12px;">
+                <div class="card-body text-md-left" style="border: none; padding: 25px;">
                     
                     <h5 class="card-title text-muted">Total Transaksi</h5>
 
@@ -32,27 +32,41 @@
 
                     <p class="mb-0 text-muted">
                         Update terakhir:  
-                        {{ optional($updated_saldo?->periode ? \Carbon\Carbon::parse($updated_saldo->periode) : null)
-                            ?->format('d M Y') ?? '-' }}
+                        {{ $dateTransaksi ? \Carbon\Carbon::parse($dateTransaksi->transaction_date)->format('d M Y') : '-' }}
                     </p>
                 </div>
             </div>
         </div>
     </div>
     
-    <div class="box-header with-border  sm-6 md-8 lg-12" style="margin-bottom: -25px; margin-right: 10px;">
-        <h3 class="box-title">.</h3>
-        <div class="box-tools pull-right">
-            <a href="{{ route('transactions.create') }}" 
-               class="btn btn-primary btn-sm">
-               <i class="fa fa-plus"></i> Tambah Transaksi
-            </a>
+    <div class="container-fluid" style="padding-left: 15px; padding-right: 15px; margin-top: 20px;">
+        <div class="row">
+            <div class="col-12">
+                <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; margin-bottom: 20px;">
+                    <a href="{{ route('transactions.export.excel') }}" 
+                       class="btn btn-success btn-sm"
+                       style="min-width: 110px; margin-bottom: 5px;">
+                       <i class="fa fa-file-excel-o"></i> Excel
+                    </a>
+                    <a href="{{ route('transactions.export.pdf') }}" 
+                       class="btn btn-danger btn-sm"
+                       target="_blank"
+                       style="min-width: 110px; margin-bottom: 5px;">
+                       <i class="fa fa-file-pdf-o"></i> PDF
+                    </a>
+                    <a href="{{ route('transactions.create') }}" 
+                       class="btn btn-primary btn-sm"
+                       style="min-width: 110px; margin-bottom: 5px;">
+                       <i class="fa fa-plus"></i> Tambah Transaksi
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
 
 
      <!-- tabel -->
-    <div class="box-body" style="margin-top: 100px;">
+    <div class="container-fluid" style="padding-left: 15px; padding-right: 15px;">
         <div class="table-responsive">
             <table class="table table-bordered table-hover" id="dataTable">
                 <thead>
@@ -96,7 +110,7 @@
                 ajax: "{{ route('transactions.data') }}",
                 columns: [
                     {data: 'id'},
-                    {data: 'category.name'},
+                    {data: 'name'},
                     {data: 'amount'},
                     {data: 'description'},
                     {data: 'name_items'},

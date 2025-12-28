@@ -15,16 +15,6 @@
                                     <form action="{{ route('transactions.store') }}" method="POST" enctype="multipart/form-data">
                                         @csrf
 
-                                        <div class="form-group @error('category_id') has-error @enderror">
-                                            <label>Kategori Transaksi</label>
-                                            <select class="form-control" name="category_id" required>
-                                                <option value="" disabled selected>-- Pilih Kategori --</option>
-                                                @foreach($categories as $category)
-                                                    <option value="{{ $category->id }}">{{ $category->name }}</option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-
                                         <div class="form-group @error('total') has-error @enderror">
                                             <label>Total Transaksi</label>
                                             <input type="text" class="form-control" name="total" id="total_transaksi"

@@ -6,6 +6,9 @@ use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 use App\Models\Saldo;
 use App\Models\Category;
+use App\Exports\SaldoExport;
+use Maatwebsite\Excel\Facades\Excel;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class SaldoController extends Controller
 {   
@@ -22,7 +25,7 @@ class SaldoController extends Controller
                 return 'Rp ' . number_format($model->amount, 0, ',', '.');
             })
             ->addColumn('periode_saldo', function ($model) {
-                return date('Y-m-d', strtotime($model->periode_saldo));
+                return \Carbon\Carbon::parse($model->periode_saldo)->translatedFormat('d F Y');
             })
             ->addColumn('action', 'saldo.action')
             ->addIndexColumn()
@@ -147,6 +150,54 @@ class SaldoController extends Controller
             'total' => $total,
             'category_id' => $categoryId
         ]);
+    }
+
+    /**
+     * Get filtered saldo by month and/or year
+     */
+    public function getFilteredSaldo(Request $request)
+    {
+        $query = Saldo::query();
+        
+        if ($request->has('month') && $request->month != '') {
+            $query->whereMonth('periode_saldo', $request->month);
+        }
+        
+        if ($request->has('year') && $request->year != '') {
+            $query->whereYear('periode_saldo', $request->year);
+        }
+        
+        $total = $query->sum('amount');
+        
+        return response()->json([
+            'total' => $total,
+            'month' => $request->month,
+            'year' => $request->year
+        ]);
+    }
+
+    /**
+     * Export saldo to Excel
+     */
+    public function exportExcel()
+    {
+        return Excel::download(new SaldoExport, 'data-saldo-' . date('Y-m-d') . '.xlsx');
+    }
+
+    /**
+     * Export saldo to PDF
+     */
+    public function exportPdf()
+    {
+        $saldos = Saldo::with('category')->orderBy('periode_saldo', 'desc')->get();
+        $totalSaldo = Saldo::sum('amount');
+
+        $pdf = Pdf::loadView('saldo.pdf', [
+            'saldos' => $saldos,
+            'totalSaldo' => $totalSaldo,
+        ]);
+
+        return $pdf->download('data-saldo-' . date('Y-m-d') . '.pdf');
     }
 
     /**

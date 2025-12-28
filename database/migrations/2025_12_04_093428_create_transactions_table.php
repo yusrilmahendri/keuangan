@@ -13,9 +13,11 @@ return new class extends Migration
     {
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('category_id')->nullable()->constrained('categories')->onDelete('set null');
             $table->decimal('amount', 15, 2)->default(0);
             $table->date('transaction_date');
             $table->string('description')->nullable();
+            $table->string('nota')->nullable();
             $table->timestamps();
         });
     }
