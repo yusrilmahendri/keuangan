@@ -42,6 +42,7 @@ class SaldoController extends Controller
             'total_saldo'   => Saldo::sum('amount'),
             'updated_saldo' => $updated_saldo,
             'title'         => 'Saldo List',
+            'categories'    => Category::all(),
         ]);
     }
 
@@ -133,6 +134,19 @@ class SaldoController extends Controller
         ]);
 
         return redirect()->route('saldos.index')->with('info', 'Saldo berhasil diperbarui!');
+    }
+
+    /**
+     * Get total saldo by category
+     */
+    public function getByCategoryId($categoryId)
+    {
+        $total = Saldo::where('category_id', $categoryId)->sum('amount');
+        
+        return response()->json([
+            'total' => $total,
+            'category_id' => $categoryId
+        ]);
     }
 
     /**

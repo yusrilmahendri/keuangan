@@ -3,6 +3,7 @@
 @section('content')
 
     <div class="row mt-5 justify-content-center" style="margin-top: 25px;">
+        <!-- Total Saldo Card -->
         <div class="col-lg-4 col-md-6 col-sm-12" style="margin-left: 20px; margin-right: 20px; margin-top: 20px; width: calc(100% - 40px);">
             <div class="card shadow-lg sm-6 md-8 lg-12" style="border: 2px solid #f0f0f0; box-shadow: 0px 2px 8px rgba(0,0,0,0.05); border-radius: 12px; ">
                 <div class="card-body text-md-left" style="border: none; margin-left: 15px;">
@@ -21,9 +22,36 @@
                 </div>
             </div>
         </div>
+
+        <!-- Filter Kategori -->
+        <div class="col-lg-8 col-md-12 col-sm-12" style="margin-left: 20px; margin-right: 20px; margin-top: 20px;  width: calc(100% - 40px);">
+            <!-- Dynamic Category Card -->
+            <div id="categoryCard" style="display: none;">
+                <div class="card shadow-lg" style="border: 2px solid #f0f0f0; box-shadow: 0px 2px 8px rgba(0,0,0,0.05); border-radius: 12px;">
+                    <div class="card-body text-md-left" style="border: none; margin-left: 15px;">
+                        <h5 class="card-title text-muted">Kategori: <span id="categoryName" class="font-weight-bold"></span></h5>
+                        <h2 class="font-weight-bold text-success">
+                            <span id="categorySaldo">Rp 0</span>
+                        </h2>
+                        <p class="mb-0 text-muted">
+                            Total saldo masuk untuk kategori ini
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="box-header with-border  sm-6 md-8 lg-12" style="margin-bottom: -25px; margin-right: 10px;">
+        <div class="form-group col-lg-8 col-md-12 col-sm-12" style="margin-bottom: 20px; margin-top: 10px;">
+                <label for="categoryFilter">Filter Berdasarkan Kategori</label>
+                <select class="form-control" id="categoryFilter">
+                    <option value="">-- Pilih Kategori Saldo --</option>
+                    @foreach($categories as $category)
+                        <option value="{{ $category->id }}" data-name="{{ $category->name }}">{{ $category->name }}</option>
+                    @endforeach
+                </select>
+        </div>
         <h3 class="box-title">.</h3>
         <div class="box-tools pull-right">
             <a href="{{ route('saldos.create') }}" 
@@ -49,14 +77,6 @@
             </table>
         </div>
     </div>
-
-   <!-- trigger pada menghapus data pengguna -->
-    <form action="" method="post" id="deleteForm">
-             @csrf
-             @method("DELETE")
-             <input type="submit" value="Hapus" 
-             style="display: none ">
-    </form>
 @endsection()
 
 @push('scripts')
@@ -81,6 +101,36 @@
                     {data: 'periode_saldo'},
                     {data: 'action'}
                 ]
+            });
+
+            // Format Rupiah function
+            function formatRupiah(angka) {
+                return 'Rp ' + angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+            }
+
+            // Handle category filter
+            $('#categoryFilter').on('change', function() {
+                const categoryId = $(this).val();
+                const categoryName = $(this).find('option:selected').data('name');
+
+                if (categoryId) {
+                    // Fetch saldo for selected category
+                    fetch(`/api/v1/saldos/category/${categoryId}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            // Update card
+                            $('#categoryName').text(categoryName);
+                            $('#categorySaldo').text(formatRupiah(data.total));
+                            $('#categoryCard').slideDown();
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('Gagal memuat data kategori');
+                        });
+                } else {
+                    // Hide card when no category selected
+                    $('#categoryCard').slideUp();
+                }
             });
         });
      </script>

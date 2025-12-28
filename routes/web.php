@@ -16,6 +16,7 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
 
 Route::get('/api/v1/budgets', [BudgetController::class, 'data'])->name('budgets.data');
 Route::get('/api/v1/saldos', [SaldoController::class, 'data'])->name('saldos.data');
+Route::get('/api/v1/saldos/category/{id}', [SaldoController::class, 'getByCategoryId'])->name('saldos.byCategory');
 Route::get('/api/v1/transactions', [TransactionsController::class, 'data'])->name('transactions.data');
 
 Route::resource('budgets', BudgetController::class);
