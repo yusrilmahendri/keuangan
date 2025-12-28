@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('category_id');
             $table->decimal('amount', 15, 2)->default(0);
             $table->date('transaction_date');
             $table->string('description')->nullable();

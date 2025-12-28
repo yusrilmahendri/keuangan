@@ -13,10 +13,13 @@ return new class extends Migration
     {
         Schema::create('saldos', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('category_id');
             $table->decimal('amount', 15, 2);
             $table->text('description')->nullable();
             $table->date('periode_saldo');
             $table->timestamps();
+
+            $table->foreign('category_id')->references('id')->on('categories')->onDelete('cascade');    
         });
     }
 

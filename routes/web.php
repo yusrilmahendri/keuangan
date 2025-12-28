@@ -5,6 +5,7 @@ use App\Http\Controllers\BudgetController;
 use App\Http\Controllers\SaldoController;
 use App\Http\Controllers\TransactionsController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\CategoryController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -20,3 +21,4 @@ Route::get('/api/v1/transactions', [TransactionsController::class, 'data'])->nam
 Route::resource('budgets', BudgetController::class);
 Route::resource('saldos', SaldoController::class);  
 Route::resource('transactions', TransactionsController::class);
+Route::resource('categories', CategoryController::class);

@@ -48,6 +48,7 @@ class SaldoController extends Controller
     {
         return view('saldo.create', [
             'title' => 'Tambah Saldo',
+            'categories' => \App\Models\Category::all(),
         ]);
     }
 
@@ -60,12 +61,14 @@ class SaldoController extends Controller
             'amount' => 'required',
             'description' => 'required|max:255',
             'periode_saldo' => 'required|date',
+            'category_id' => 'required',
         ]);
 
         Saldo::create([
             'amount' => $this->cleanRupiah($validatedData['amount']),
             'description' => $validatedData['description'],
             'periode_saldo' => $validatedData['periode_saldo'],
+            'category_id' => $validatedData['category_id'],
         ]);
 
         return redirect()->route('saldos.index')->with('success', 'Saldo berhasil ditambahkan!');
