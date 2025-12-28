@@ -4,7 +4,7 @@
 
     <div class="row mt-5 justify-content-center" style="margin-top: 40px; padding-left: 15px; padding-right: 15px;">
         <!-- Total Saldo Card -->
-        <div class="col-lg-6 col-md-6 col-sm-12" style="margin-bottom: 20px; padding-left: 10px; padding-right: 10px;">
+        <div class="col-lg-6 col-md-6 col-sm-12" style="margin-left: 20px; margin-right: 20px; margin-top: 20px; width: calc(100% - 40px);">
             <div class="card shadow-lg" style="border: 2px solid #f0f0f0; box-shadow: 0px 2px 8px rgba(0,0,0,0.05); border-radius: 12px;">
                 <div class="card-body text-md-left" style="border: none; padding: 25px;">
                     
@@ -24,9 +24,9 @@
         </div>
 
         <!-- Filter Kategori -->
-        <div class="col-lg-6 col-md-6 col-sm-12" style="margin-bottom: 20px; padding-left: 10px; padding-right: 10px;">
+        <div class="col-lg-6 col-md-6 col-sm-12"    style="margin-left: 20px; margin-right: 20px; margin-top: 20px; width: calc(100% - 40px);">
             <!-- Dynamic Category Card -->
-            <div id="categoryCard" style="display: none;">
+            <div id="categoryCard" style="display: none; margin-bottom: 20px; margin-top: 20px;">
                 <div class="card shadow-lg" style="border: 2px solid #f0f0f0; box-shadow: 0px 2px 8px rgba(0,0,0,0.05); border-radius: 12px;">
                     <div class="card-body text-md-left" style="border: none; padding: 25px;">
                         <h5 class="card-title text-muted">Kategori: <span id="categoryName" class="font-weight-bold"></span></h5>
