@@ -205,6 +205,9 @@ class SaldoController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $saldo = Saldo::findOrFail($id);
+        $saldo->delete();
+        return redirect()->route('saldos.index')
+        ->with('danger','Data Saldo Berhasil dihapuskan');
     }
 }

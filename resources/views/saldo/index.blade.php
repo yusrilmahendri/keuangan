@@ -96,6 +96,13 @@
             </table>
         </div>
     </div>
+      <!-- trigger pada menghapus data pengguna -->
+    <form action="" method="post" id="deleteForm">
+             @csrf
+             @method("DELETE")
+             <input type="submit" value="Hapus" 
+             style="display: none ">
+    </form>
 @endsection()
 
 @push('scripts')
