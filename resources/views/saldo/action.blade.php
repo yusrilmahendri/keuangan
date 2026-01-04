@@ -1,11 +1,11 @@
 <a href="{{ route('saldos.edit', $model) }}" 
-   class="btn btn-warning">
+   class="btn btn-warning" style="margin-bottom: 10px;">
   <img class="img-fluid" src="{{ asset('images/edit.png') }}" alt="">
   Edit
 </a>
 
 <button href="{{ route('saldos.destroy', $model) }}" 
-    class="btn btn-danger" id="delete">
+    class="btn btn-danger" id="delete" style="margin-top: 10px;">
     <img class="img-fluid" src="{{ asset('images/hapus.png') }}" alt="">
     Hapus
     </button>
