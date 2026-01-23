@@ -1,14 +1,18 @@
-<a href="{{ route('saldos.edit', $model) }}" 
+
+<a href="{{ route('saldos.edit', $model) }}"
    class="btn btn-warning" style="margin-bottom: 10px;">
   <img class="img-fluid" src="{{ asset('images/edit.png') }}" alt="">
   Edit
 </a>
 
-<button href="{{ route('saldos.destroy', $model) }}" 
+<button href="{{ route('saldos.destroy', $model) }}"
     class="btn btn-danger" id="delete" style="margin-top: 10px;">
     <img class="img-fluid" src="{{ asset('images/hapus.png') }}" alt="">
     Hapus
-    </button>
+</button>
+
+<button class="btn btn-info btn-sm btn-detail" data-id="{{ $model->id }}" style="margin-bottom:4px;">   <i class="fa fa-eye"></i>  Detail</button>
+
 <!-- sweat alert -->
 <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
@@ -40,4 +44,15 @@
             }
           });
    });
+
+    // Handler tombol detail (modal trigger)
+    $(document).on('click', '.btn-detail', function() {
+        var id = $(this).data('id');
+        $('#detailModal').modal('show');
+        $('#modalDetailContent').html('<div class="text-center text-muted">Memuat data...</div>');
+        $.get('/saldos/' + id, function(res) {
+            var html = $(res).find('.container').html();
+            $('#modalDetailContent').html('<div class="container">'+html+'</div>');
+        });
+    });
 </script>

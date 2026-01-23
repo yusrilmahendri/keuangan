@@ -12,7 +12,8 @@
         <div class="panel-body">
             <div class="row">
                 <div class="col-lg-12">
-                    <form action="{{ route('saldos.store') }}" method="POST">
+                    <form action="{{ route('saldos.store') }}" method="POST" enctype="multipart/form-data">
+
                         @csrf
 
                         <div class="form-group @error('amount') has-error @enderror">
@@ -27,7 +28,7 @@
                                 <label for="category_id" style="margin-bottom: 0;">Kategori Saldo</label>
                                 <a href="#" id="toggleCategoryForm" style="font-size: 12px; white-space: nowrap;">+ Tambah Kategori Baru</a>
                             </div>
-                            
+
                             <select class="form-control" name="category_id" id="category_id">
                                 <option value="">-- Pilih Kategori --</option>
                                 @foreach($categories as $category)
@@ -55,6 +56,14 @@
                             <label for="date">Tanggal Masuk Saldo</label>
                             <input type="date" class="form-control"
                                 name="periode_saldo" placeholder="masukan tanggal" autofocus/>
+                        </div>
+
+                        <div class="form-group @error('nota_image') has-error @enderror">
+                            <label for="nota_image">Upload Gambar Nota <span style="font-weight: normal; color: #888; font-size: 90%;">(Opsional)</span></label>
+                            <input type="file" class="form-control" name="nota_image" id="nota_image" accept="image/*" />
+                            @error('nota_image')
+                                <span class="help-block">{{ $message }}</span>
+                            @enderror
                         </div>
 
                         <button type="submit" class="btn btn-primary" id="submitBtn">
@@ -145,7 +154,7 @@
     // Save category via AJAX
     document.getElementById('saveCategoryBtn').addEventListener('click', function() {
         const categoryName = document.getElementById('new_category_name').value;
-        
+
         if (!categoryName) {
             swal('Error!', 'Nama kategori tidak boleh kosong!', 'error');
             return;

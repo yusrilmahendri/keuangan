@@ -20,9 +20,9 @@
 
                       <div class="form-group @error('amount') has-error @enderror">
                         <label for="amount">Jumlah Saldo</label>
-                        <input type="text" 
+                        <input type="text"
                           class="form-control"
-                          name="amount" 
+                          name="amount"
                           value="{{ old('amount', 'Rp ' . number_format($Saldo->amount, 0, ',', '.')) }}"
                           placeholder="masukan Jumlah Saldo"
                          autofocus/>
@@ -42,9 +42,9 @@
 
                     <div class="form-group @error('description') has-error @enderror">
                         <label for="description">Keterangan / Catatan</label>
-                        <input type="text" 
+                        <input type="text"
                           class="form-control"
-                          name="description" 
+                          name="description"
                           value="{{ old('description', $Saldo->description) }}"
                           placeholder="masukan keterangan/catatan"  autofocus/>
                     </div>
@@ -52,11 +52,26 @@
 
                     <div class="form-group @error('periode_saldo') has-error @enderror">
                         <label for="date">Tanggal Masuk Saldo</label>
-                        <input type="date" 
+                        <input type="date"
                           class="form-control"
                           value="{{ old('periode_saldo', $Saldo->periode_saldo) }}"
-                          name="periode_saldo" 
+                          name="periode_saldo"
                           placeholder="masukan tanggal"  autofocus/>
+                    </div>
+
+                    <div class="form-group @error('nota_image') has-error @enderror">
+                        <label for="nota_image">Upload Gambar Nota <span style="font-weight: normal; color: #888; font-size: 90%;">(Opsional)</span></label>
+                        @if (!empty($Saldo->nota_image))
+                            <div style="margin-bottom:10px;">
+                                <a href="{{ asset('storage/' . $Saldo->nota_image) }}" target="_blank">
+                                    <img src="{{ asset('storage/' . $Saldo->nota_image) }}" alt="Nota" style="max-width:120px;max-height:120px;border:1px solid #eee;">
+                                </a>
+                            </div>
+                        @endif
+                        <input type="file" class="form-control" name="nota_image" id="nota_image" accept="image/*" />
+                        @error('nota_image')
+                            <span class="help-block">{{ $message }}</span>
+                        @enderror
                     </div>
 
                 <button type="submit" class="btn btn-primary">

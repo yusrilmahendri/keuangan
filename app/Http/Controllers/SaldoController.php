@@ -11,7 +11,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class SaldoController extends Controller
-{   
+{
 
     public function data()
     {
@@ -24,12 +24,23 @@ class SaldoController extends Controller
             ->addColumn('amount', function ($model) {
                 return 'Rp ' . number_format($model->amount, 0, ',', '.');
             })
+            ->addColumn('description', function ($model) {
+                return $model->description ?: '-';
+            })
+            ->addColumn('nota_image', function ($model) {
+                if (!empty($model->nota_image)) {
+                    $url = asset('storage/' . $model->nota_image);
+                    return '<a href="' . $url . '" target="_blank"><img src="' . $url . '" alt="Nota" style="max-width:60px;max-height:60px;"></a>';
+                } else {
+                    return '-';
+                }
+            })
             ->addColumn('periode_saldo', function ($model) {
                 return \Carbon\Carbon::parse($model->periode_saldo)->translatedFormat('d F Y');
             })
             ->addColumn('action', 'saldo.action')
             ->addIndexColumn()
-            ->rawColumns(['action'])
+            ->rawColumns(['action','nota_image'])
             ->toJson();
     }
 
@@ -77,6 +88,7 @@ class SaldoController extends Controller
             'description' => $validatedData['description'],
             'periode_saldo' => $validatedData['periode_saldo'],
             'category_id' => $validatedData['category_id'],
+            'nota_image' => $request->file('nota_image') ? $request->file('nota_image')->store('nota_images', 'public') : null,
         ]);
 
         return redirect()->route('saldos.index')->with('success', 'Saldo berhasil ditambahkan!');
@@ -127,13 +139,14 @@ class SaldoController extends Controller
             'periode_saldo' => 'required|date',
             'category_id' => 'required',
         ]);
-            
+
         $saldo = Saldo::findOrFail($id);
         $saldo->update([
             'amount' => $this->cleanRupiah($validatedData['amount']),
             'description' => $validatedData['description'],
             'periode_saldo' => $validatedData['periode_saldo'],
             'category_id' => $validatedData['category_id'],
+            'nota_image' => $request->file('nota_image') ? $request->file('nota_image')->store('nota_images', 'public') : $saldo->nota_image,
         ]);
 
         return redirect()->route('saldos.index')->with('info', 'Saldo berhasil diperbarui!');
@@ -145,7 +158,7 @@ class SaldoController extends Controller
     public function getByCategoryId($categoryId)
     {
         $total = Saldo::where('category_id', $categoryId)->sum('amount');
-        
+
         return response()->json([
             'total' => $total,
             'category_id' => $categoryId
@@ -158,17 +171,17 @@ class SaldoController extends Controller
     public function getFilteredSaldo(Request $request)
     {
         $query = Saldo::query();
-        
+
         if ($request->has('month') && $request->month != '') {
             $query->whereMonth('periode_saldo', $request->month);
         }
-        
+
         if ($request->has('year') && $request->year != '') {
             $query->whereYear('periode_saldo', $request->year);
         }
-        
+
         $total = $query->sum('amount');
-        
+
         return response()->json([
             'total' => $total,
             'month' => $request->month,
