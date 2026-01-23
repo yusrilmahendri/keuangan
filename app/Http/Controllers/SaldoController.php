@@ -88,7 +88,7 @@ class SaldoController extends Controller
             'description' => $validatedData['description'],
             'periode_saldo' => $validatedData['periode_saldo'],
             'category_id' => $validatedData['category_id'],
-            'nota_image' => $request->file('nota_image') ? $request->file('nota_image')->store('nota_images', 'public') : null,
+            'nota_image' => $request->file('nota_image') ? $request->file('nota_image')->store('nota', 'public') : null,
         ]);
 
         return redirect()->route('saldos.index')->with('success', 'Saldo berhasil ditambahkan!');
@@ -146,7 +146,7 @@ class SaldoController extends Controller
             'description' => $validatedData['description'],
             'periode_saldo' => $validatedData['periode_saldo'],
             'category_id' => $validatedData['category_id'],
-            'nota_image' => $request->file('nota_image') ? $request->file('nota_image')->store('nota_images', 'public') : $saldo->nota_image,
+            'nota_image' => $request->file('nota_image') ? $request->file('nota_image')->store('nota', 'public') : $saldo->nota_image,
         ]);
 
         return redirect()->route('saldos.index')->with('info', 'Saldo berhasil diperbarui!');
