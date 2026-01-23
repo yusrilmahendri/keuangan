@@ -17,7 +17,6 @@ return new class extends Migration
             $table->decimal('amount', 15, 2);
             $table->text('description')->nullable();
             $table->date('periode_saldo');
-            $table->string('nota_image')->nullable();
             $table->timestamps();
 
             $table->foreign('category_id')->references('id')->on('categories')->onDelete('cascade');
