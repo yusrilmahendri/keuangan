@@ -6,12 +6,12 @@
 </a>
 
 <button href="{{ route('saldos.destroy', $model) }}"
-    class="btn btn-danger" id="delete" style="margin-top: 10px;">
+    class="btn btn-danger" id="delete" style="margin-top: 10px; margin-bottom: 10px;">
     <img class="img-fluid" src="{{ asset('images/hapus.png') }}" alt="">
     Hapus
 </button>
 
-<button class="btn btn-info btn-sm btn-detail" data-id="{{ $model->id }}" style="margin-bottom:4px;">   <i class="fa fa-eye"></i>  Detail</button>
+<button class="btn btn-info btn-sm btn-detail" style="margin-top: 10px;" data-id="{{ $model->id }}" style="margin-bottom:4px;">   <i class="fa fa-eye"></i>  Detail</button>
 
 <!-- sweat alert -->
 <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>

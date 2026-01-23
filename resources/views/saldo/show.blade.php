@@ -19,18 +19,16 @@
                                 <div><span class="fw-bold text-secondary">Waktu Input:</span> <span class="text-dark">{{ $Saldo->created_at->format('d M Y H:i') }}</span></div>
                             </div>
                         </div>
+                        @if (!empty($Saldo->nota_image))
                         <div class="col-md-6 col-12 mb-3 text-center">
                             <div class="nota-preview p-2" style="background: #f8f9fa; border-radius: 12px; min-height: 120px;">
                                 <span class="fw-bold text-secondary">Nota:</span><br>
-                                @if (!empty($Saldo->nota_image))
-                                    <a href="{{ asset('storage/' . $Saldo->nota_image) }}" target="_blank" style="display:inline-block; margin-top:8px;">
-                                        <img src="{{ asset('storage/' . $Saldo->nota_image) }}" alt="Nota" style="max-width: 100%; max-height: 180px; border-radius: 8px; box-shadow:0 2px 8px rgba(0,0,0,0.07); border:1px solid #e0e0e0; transition:0.2s;">
-                                    </a>
-                                @else
-                                    <span class="text-muted">-</span>
-                                @endif
+                                <a href="{{ asset('storage/' . $Saldo->nota_image) }}" target="_blank" style="display:inline-block; margin-top:8px;">
+                                    <img src="{{ asset('storage/' . $Saldo->nota_image) }}" alt="Nota" style="max-width: 100%; max-height: 180px; border-radius: 8px; box-shadow:0 2px 8px rgba(0,0,0,0.07); border:1px solid #e0e0e0; transition:0.2s;">
+                                </a>
                             </div>
                         </div>
+                        @endif
                     </div>
                     <div class="text-center mt-4">
                         <a href="{{ route('saldos.index') }}" class="btn btn-outline-primary px-4 py-2" style="border-radius: 8px; font-weight: 600;">Kembali</a>
