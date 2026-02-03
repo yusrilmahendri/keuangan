@@ -68,6 +68,18 @@ class DashboardController extends Controller
             }
         }
 
+        // Komparasi pemasukan vs pengeluaran
+        $comparison = [
+            [
+                'name' => 'Pemasukan',
+                'y'    => $totalSaldo,
+            ],
+            [
+                'name' => 'Pengeluaran',
+                'y'    => $totalPengeluaran,
+            ],
+        ];
+
         return view('dashboard', [
             'totalSaldo'        => $totalSaldo,
             'totalPengeluaran'  => $totalPengeluaran,
@@ -77,6 +89,7 @@ class DashboardController extends Controller
             'pengeluaranBulanan'=> $pengeluaranBulanan,
             'categories'        => $categories,
             'saldoPerKategori'  => $saldoPerKategori,
+            'comparison'        => $comparison,
         ]);
     }
 

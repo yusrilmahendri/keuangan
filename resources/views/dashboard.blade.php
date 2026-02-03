@@ -168,12 +168,12 @@
     <div class="row mb-3" style="margin-top: 20px; margin-right: 20px;">
         <div class="col-12">
             <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end;">
-                <a href="{{ route('dashboard.export.excel') }}" 
+                <a href="{{ route('dashboard.export.excel') }}"
                    class="btn btn-success btn-sm"
                    style="min-width: 110px;">
                    <i class="fa fa-file-excel-o"></i> Excel
                 </a>
-                <a href="{{ route('dashboard.export.pdf') }}" 
+                <a href="{{ route('dashboard.export.pdf') }}"
                    class="btn btn-danger btn-sm"
                    target="_blank"
                    style="min-width: 110px;">
@@ -183,21 +183,33 @@
         </div>
     </div>
 
-    {{-- Grafik Pengeluaran Bulanan --}}
-    <div class="card shadow-sm border-0 mt-4" style="margin-top: 100px;">
+     <div class="card shadow-sm border-0 mt-4">
         <div class="card-body">
             <h5 class="fw-bold">Grafik Pengeluaran per Bulan</h5>
             <div id="pengeluaranChart" style="height: 400px;"></div>
         </div>
     </div>
 
-    {{-- Grafik Saldo per Kategori --}}
-    <div class="card shadow-sm border-0 mt-4">
-        <div class="card-body">
-            <h5 class="fw-bold">Grafik Saldo Berdasarkan Kategori</h5>
-            <div id="saldoKategoriChart" style="height: 450px;"></div>
+    <div class="row mt-4">
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <h5 class="fw-bold">Pie Chart Pengeluaran vs Pemasukan</h5>
+                    <div id="pieComparisonChart" style="height: 400px;"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <h5 class="fw-bold">Grafik Saldo Berdasarkan Kategori</h5>
+                    <div id="saldoKategoriChart" style="height: 400px;"></div>
+                </div>
+            </div>
         </div>
     </div>
+
+
 
 </div>
 @endsection
@@ -210,7 +222,7 @@
 document.getElementById('categoryFilter').addEventListener('change', function() {
     const categoryId = this.value;
     const categoryCard = document.getElementById('categorySaldoCard');
-    
+
     if (categoryId) {
         // Fetch category saldo
         fetch(`/api/v1/saldos/category/${categoryId}`)
@@ -235,19 +247,19 @@ function updateFilteredSaldo() {
     const month = document.getElementById('monthFilter').value;
     const year = document.getElementById('yearFilter').value;
     const filteredCard = document.getElementById('filteredSaldoCard');
-    
+
     if (month || year) {
         const params = new URLSearchParams();
         if (month) params.append('month', month);
         if (year) params.append('year', year);
-        
+
         fetch(`/api/v1/saldos/filter?${params.toString()}`)
             .then(response => response.json())
             .then(data => {
                 let periodText = '';
-                const monthNames = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 
+                const monthNames = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
                                    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-                
+
                 if (month && year) {
                     periodText = `${monthNames[month]} ${year}`;
                 } else if (month) {
@@ -255,7 +267,7 @@ function updateFilteredSaldo() {
                 } else if (year) {
                     periodText = `Tahun ${year}`;
                 }
-                
+
                 document.getElementById('filterPeriod').textContent = periodText;
                 document.getElementById('filteredSaldoAmount').textContent = formatRupiah(data.total);
                 filteredCard.style.display = 'block';
@@ -316,6 +328,56 @@ Highcharts.chart('pengeluaranChart', {
             @endforeach
         ],
         color: '#0d6efd'
+    }],
+    credits: {
+        enabled: false
+    }
+});
+
+// Highcharts - Pie Chart Pengeluaran vs Pemasukan
+Highcharts.chart('pieComparisonChart', {
+    chart: {
+        type: 'pie'
+    },
+    title: {
+        text: null
+    },
+    tooltip: {
+        pointFormatter: function() {
+            return '<b>Rp ' + this.y.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') + '</b><br/>' +
+                   'Persentase: <b>' + this.percentage.toFixed(2) + '%</b>';
+        }
+    },
+    plotOptions: {
+        pie: {
+            allowPointSelect: true,
+            cursor: 'pointer',
+            dataLabels: {
+                enabled: true,
+                format: '<b>{point.name}</b><br>Rp {point.y:,.0f}<br>{point.percentage:.1f}%',
+                style: {
+                    fontSize: '12px'
+                },
+                formatter: function() {
+                    return '<b>' + this.point.name + '</b><br/>' +
+                           'Rp ' + this.y.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') + '<br/>' +
+                           this.percentage.toFixed(1) + '%';
+                }
+            },
+            showInLegend: true
+        }
+    },
+    series: [{
+        name: 'Total',
+        colorByPoint: true,
+        data: [
+            @foreach($comparison as $item)
+                {
+                    name: "{{ $item['name'] }}",
+                    y: {{ $item['y'] }}
+                },
+            @endforeach
+        ]
     }],
     credits: {
         enabled: false
