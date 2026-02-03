@@ -15,7 +15,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class TransactionsController extends Controller
-{   
+{
     public function data()
     {
         $transactions = Transaction::orderBy('transaction_date', 'desc');
@@ -24,42 +24,20 @@ class TransactionsController extends Controller
             ->addColumn('name', function (Transaction $model) {
                 return $model->category->name ?? '-';
             })
-
-            ->addColumn('name_items', function (Transaction $model) {
-
-                if ($model->items->isEmpty()) {
-                    return '-';
-                }
-
-                $html = '<ul style="padding-left:16px; margin:0;">';
-
-                foreach ($model->items as $item) {
-                    $html .= '<li>';
-                    $html .= '<strong>' . ($item->name ?? '-') . '</strong>';
-                    $html .= '<br>Jumlah: ' . ($item->quantity ?? 0);
-                    $html .= '<br>Harga: Rp ' . number_format($item->price, 0, ',', '.');
-
-                    if (!empty($item->note)) {
-                        $html .= '<br>Keterangan: ' . $item->note;
-                    }
-
-                    $html .= '</li><br>';
-                }
-
-                $html .= '</ul>';
-
-                return $html;
-            })
-
             // FORMAT RUPIAH
             ->editColumn('amount', function ($row) {
                 return 'Rp ' . number_format($row->amount, 0, ',', '.');
             })
 
             // FORMAT DESCRIPTION
-            ->editColumn('description', function ($row) {
-                return $row->description ?: '-';
-            })
+                ->editColumn('description', function ($row) {
+                    return $row->description ?: '-';
+                })
+
+            // FORMAT KETERANGAN DETAIL
+                ->editColumn('keterangan_detail', function ($row) {
+                    return $row->keterangan_detail ?: '-';
+                })
 
             // FORMAT TANGGAL KE d M Y
             ->editColumn('transaction_date', function ($row) {
@@ -85,24 +63,18 @@ class TransactionsController extends Controller
 
         // Total amount dari tabel transactions
         $totalAmount = Transaction::sum('amount');
-
-        // Total price dari tabel transaction_items
-        // TANPA dikali quantity, sesuai permintaan Anda
-        $totalPrice = TransactionItem::sum('price');
-
         // Total keseluruhan amount + price
-        $totalSemua = $totalAmount + $totalPrice;
+        $totalSemua = $totalAmount;
 
         // Sisa saldo (saldo - total transaksi)
         $sisaSaldo = $totalSaldo - $totalSemua;
         $dateTransaksi = Transaction::latest()->first();
-  
+
         return view('transactions.index', [
             'transaksi' => Transaction::all(),
             'dateTransaksi' => $dateTransaksi,
             'title' => 'Transaction List',
             'totalAmount' => $totalAmount,
-            'totalPrice' => $totalPrice,
             'totalSemua' => $totalSemua,
             'totalSaldo' => $totalSaldo,
             'sisaSaldo' => $sisaSaldo,
@@ -137,26 +109,9 @@ class TransactionsController extends Controller
             'amount' => $total, // sudah bersih
             'transaction_date'  => $request->date,
             'description' => $request->description,
+            'keterangan_detail' => $request->keterangan_detail,
             'nota'  => $notaFile
         ]);
-
-        // Simpan detail barang (jika ada)
-        if ($request->items) {
-            foreach ($request->items as $item) {
-                if (!empty($item['price'])) {
-                    // Hapus format Rupiah dari harga item
-                    $price = preg_replace('/[Rp\s\.]/', '', $item['price']);
-
-                    TransactionItem::create([
-                        'transaction_id' => $trx->id,
-                        'name'     => $item['name'] ?? null,
-                        'quantity' => $item['quantity'] ?? 1,
-                        'price'    => $price,
-                        'note'     => $item['note'] ?? null,
-                    ]);
-                }
-            }
-        }
 
         return redirect()->route('transactions.index')->with('success', 'Transaksi berhasil disimpan!');
     }
@@ -175,7 +130,7 @@ class TransactionsController extends Controller
     public function edit(string $id)
     {
         return view('transactions.edit', [
-            'transaction' => Transaction::with('items')->findOrFail($id),
+            'transaction' => Transaction::findOrFail($id),
         ]);
     }
 
@@ -184,7 +139,7 @@ class TransactionsController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $transaction = Transaction::with('items')->findOrFail($id);
+        $transaction = Transaction::findOrFail($id);
 
         // ==========================
         // VALIDASI
@@ -193,13 +148,7 @@ class TransactionsController extends Controller
             'amount' => 'required|string',
             'description' => 'nullable|string',
             'date' => 'required|date',
-
-            'items' => 'nullable|array',
-            'items.*.id' => 'nullable|integer',
-            'items.*.name' => 'nullable|string',
-            'items.*.quantity' => 'nullable',
-            'items.*.price' => 'nullable|string',
-            'items.*.note' => 'nullable|string',
+            'keterangan_detail' => 'nullable|string',
         ]);
 
         DB::beginTransaction();
@@ -213,6 +162,7 @@ class TransactionsController extends Controller
                 'amount' => $amount,
                 'description' => $validated['description'] ?? null,
                 'transaction_date' => $validated['date'],
+                'keterangan_detail' => $validated['keterangan_detail'] ?? null,
             ]);
 
             // HANDLING NOTA
@@ -223,64 +173,6 @@ class TransactionsController extends Controller
 
                 $notaPath = $request->file('nota')->store('nota', 'public');
                 $transaction->update(['nota' => $notaPath]);
-            }
-
-            // ======================================
-            // FIX UTAMA: HANDLE JIKA ITEMS KOSONG
-            // ======================================
-            if (!isset($validated['items']) || count($validated['items']) === 0) {
-
-                // Hapus semua item lama
-                $transaction->items()->delete();
-
-                DB::commit();
-                return redirect()
-                    ->route('transactions.index')
-                    ->with('success', 'Transaction updated successfully (without items)!');
-            }
-
-            // ======================================
-            // PROSES ITEMS JIKA ADA
-            // ======================================
-
-            $existingIds = $transaction->items->pluck('id')->toArray();
-
-            $requestIds = collect($validated['items'])
-                ->pluck('id')
-                ->filter()
-                ->toArray();
-
-            // HAPUS ITEM LAMA YANG DI REMOVE
-            $idsToDelete = array_diff($existingIds, $requestIds);
-            TransactionItem::whereIn('id', $idsToDelete)->delete();
-
-            // UPDATE / INSERT item baru
-            foreach ($validated['items'] as $item) {
-
-                // Convert harga
-                $price = isset($item['price'])
-                    ? preg_replace('/[^0-9]/', '', $item['price'])
-                    : 0;
-
-                // Update item lama
-                if (isset($item['id'])) {
-                    TransactionItem::where('id', $item['id'])->update([
-                        'name' => $item['name'] ?? null,
-                        'quantity' => $item['quantity'] ?? null,
-                        'price' => $price,
-                        'note' => $item['note'] ?? null,
-                    ]);
-                }
-
-                // Insert item baru
-                else {
-                    $transaction->items()->create([
-                        'name' => $item['name'] ?? null,
-                        'quantity' => $item['quantity'] ?? null,
-                        'price' => $price,
-                        'note' => $item['note'] ?? null,
-                    ]);
-                }
             }
 
             DB::commit();
@@ -329,18 +221,18 @@ class TransactionsController extends Controller
     public function destroy(string $id)
     {
         $transaction = Transaction::findOrFail($id);
-        
+
         // Hapus file nota jika ada
         if ($transaction->nota) {
             Storage::disk('public')->delete($transaction->nota);
         }
-        
+
         // Hapus transaction items (cascade delete)
         $transaction->items()->delete();
-        
+
         // Hapus transaction
         $transaction->delete();
-        
+
         return redirect()->route('transactions.index')->with('success', 'Transaksi berhasil dihapus!');
     }
 }

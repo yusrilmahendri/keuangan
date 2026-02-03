@@ -12,7 +12,7 @@ class Transaction extends Model
     /** @use HasFactory<\Database\Factories\TransactionFactory> */
     use HasFactory;
 
-    protected $fillable = ['category_id', 'amount', 'description', 'transaction_date', 'nota'];
+    protected $fillable = ['category_id', 'amount', 'description', 'transaction_date', 'nota', 'keterangan_detail'];
     protected $casts = [
     'transaction_date' => 'date',
 ];

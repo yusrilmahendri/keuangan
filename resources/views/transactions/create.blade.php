@@ -38,47 +38,14 @@
                                             <input type="file" class="form-control" name="nota" />
                                         </div>
 
-                                        <hr>
-
-                                        <h4>Detail Barang (Opsional)</h4>
-
-                                        <div id="detail-container">
-
-                                            <!-- ROW PERTAMA -->
-                                            <div class="row item-row mb-2">
-                                                <div class="col-md-3">
-                                                    <input type="text" name="items[0][name]" class="form-control item-nama"
-                                                        placeholder="Nama Barang">
-                                                </div>
-
-                                                <div class="col-md-2">
-                                                    <input type="text" name="items[0][quantity]" class="form-control item-jumlah"
-                                                        placeholder="Jumlah" min="1">
-                                                </div>
-
-                                                <div class="col-md-2">
-                                                    <input type="text" name="items[0][price]" class="form-control item-harga"
-                                                        placeholder="Harga" min="0">
-                                                </div>
-
-                                                <div class="col-md-3">
-                                                    <input type="text" name="items[0][note]" class="form-control item-ket"
-                                                        placeholder="Keterangan (opsional)">
-                                                </div>
-
-                                                <div class="col-md-2 d-flex" style="margin-top: 5px;">
-                                                    <button type="button" class="btn btn-danger btn-remove ml-1">
-                                                        X
-                                                    </button>
-                                                    <button type="button" class="btn btn-success btn-add ml-1">
-                                                        +
-                                                    </button>
-                                                </div>
-                                            </div>
-
+                                        <div class="form-group @error('keterangan_detail') has-error @enderror">
+                                            <label>Keterangan Detail (opsional)</label>
+                                            <input type="text" class="form-control"
+                                                name="keterangan_detail" placeholder="masukan keterangan detail" autofocus />
                                         </div>
 
                                         <hr>
+
 
                                         <button type="submit" class="btn btn-primary">
                                             Simpan Data

@@ -34,11 +34,13 @@
 				Saldo</a>
 		</li>
 
+
         <li class="{{ request()->is('transactions*') ? 'active' : '' }}">
             <a href="{{ url('transactions') }}">
                 <em class="fa fa-shopping-cart">&nbsp;</em>
                 Transactions</a>
         </li>
-	
 	</ul>
+
+	
 </div>

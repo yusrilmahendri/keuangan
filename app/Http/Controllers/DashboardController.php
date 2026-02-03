@@ -28,8 +28,7 @@ class DashboardController extends Controller
 
         // Total Pengeluaran (amount + price item)
         $totalAmount = Transaction::sum('amount');
-        $totalPrice  = TransactionItem::sum('price');
-        $totalPengeluaran = $totalAmount + $totalPrice;
+        $totalPengeluaran = $totalAmount;
 
         // Sisa Saldo
         $sisaSaldo = $totalSaldo - $totalPengeluaran;
@@ -48,8 +47,7 @@ class DashboardController extends Controller
         for ($i = 1; $i <= 12; $i++) {
             $bulanNama = Carbon::create()->month($i)->translatedFormat('M');
 
-            $total = Transaction::whereMonth('created_at', $i)->sum('amount')
-                   + TransactionItem::whereMonth('created_at', $i)->sum('price');
+            $total = Transaction::whereMonth('created_at', $i)->sum('amount');
 
             $pengeluaranBulanan[] = [
                 'bulan' => $bulanNama,
@@ -61,7 +59,7 @@ class DashboardController extends Controller
         $saldoPerKategori = [];
         foreach ($categories as $category) {
             $totalSaldoCategory = Saldo::where('category_id', $category->id)->sum('amount');
-            
+
             if ($totalSaldoCategory > 0) {
                 $saldoPerKategori[] = [
                     'name' => $category->name,
@@ -97,7 +95,7 @@ class DashboardController extends Controller
     public function exportPdf()
     {
         $data = $this->getDashboardData();
-        
+
         $pdf = Pdf::loadView('dashboard-pdf', $data);
         return $pdf->download('laporan-dashboard-' . date('Y-m-d') . '.pdf');
     }
@@ -112,8 +110,7 @@ class DashboardController extends Controller
 
         // Total Pengeluaran
         $totalAmount = Transaction::sum('amount');
-        $totalPrice  = TransactionItem::sum('price');
-        $totalPengeluaran = $totalAmount + $totalPrice;
+        $totalPengeluaran = $totalAmount;
 
         // Sisa Saldo
         $sisaSaldo = $totalSaldo - $totalPengeluaran;
@@ -141,7 +138,7 @@ class DashboardController extends Controller
         $saldoPerKategori = [];
         foreach ($categories as $category) {
             $totalSaldoCategory = Saldo::where('category_id', $category->id)->sum('amount');
-            
+
             if ($totalSaldoCategory > 0) {
                 $saldoPerKategori[] = [
                     'name' => $category->name,
