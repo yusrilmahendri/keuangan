@@ -19,7 +19,7 @@ jobs:
           script: |
             cd ~/domains/pioneersolve.id/public_html/money
 
-            echo "🧹 Resetting local changes..."
+            echo "🧹 Resetting local changes...."
             git fetch --all
             git reset --hard origin/main
 
