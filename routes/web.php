@@ -27,6 +27,6 @@ Route::get('/saldos/export/pdf', [SaldoController::class, 'exportPdf'])->name('s
 Route::get('/transactions/export/excel', [TransactionsController::class, 'exportExcel'])->name('transactions.export.excel');
 Route::get('/transactions/export/pdf', [TransactionsController::class, 'exportPdf'])->name('transactions.export.pdf');
 
-Route::resource('saldos', SaldoController::class);  
+Route::resource('saldos', SaldoController::class);
 Route::resource('transactions', TransactionsController::class);
 Route::resource('categories', CategoryController::class);

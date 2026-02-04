@@ -335,7 +335,7 @@ Highcharts.chart('pengeluaranChart', {
 });
 
 // Highcharts - Pie Chart Pengeluaran vs Pemasukan
-Highcharts.chart('pieComparisonChart', {
+const pieComparisonChart = Highcharts.chart('pieComparisonChart', {
     chart: {
         type: 'pie'
     },
@@ -385,7 +385,7 @@ Highcharts.chart('pieComparisonChart', {
 });
 
 // Highcharts - Saldo per Kategori (Pie Chart)
-Highcharts.chart('saldoKategoriChart', {
+const saldoKategoriChart = Highcharts.chart('saldoKategoriChart', {
     chart: {
         type: 'pie'
     },
@@ -433,5 +433,45 @@ Highcharts.chart('saldoKategoriChart', {
         enabled: false
     }
 });
+</script>
+
+<script>
+    function updatePieCharts() {
+    const month = document.getElementById('monthFilter').value;
+    const year = document.getElementById('yearFilter').value;
+    const category = document.getElementById('categoryFilter').value;
+
+    const params = new URLSearchParams();
+    if (month) params.append('month', month);
+    if (year) params.append('year', year);
+    if (category) params.append('category', category);
+
+    fetch(`/api/dashboard/summary?${params.toString()}`)
+        .then(res => res.json())
+        .then(data => {
+            const comparisonData = data.comparison.map(item => ({
+                name: item.name,
+                y: Number(item.y)
+            }));
+
+            const saldoKategoriData = data.saldoPerKategori.map(item => ({
+                name: item.name,
+                y: Number(item.y)
+            }));
+
+            pieComparisonChart.series[0].setData(comparisonData, true);
+            saldoKategoriChart.series[0].setData(saldoKategoriData, true);
+        })
+        .catch(err => console.error(err));
+}
+
+document.getElementById('monthFilter')
+    .addEventListener('change', updatePieCharts);
+
+document.getElementById('yearFilter')
+    .addEventListener('change', updatePieCharts);
+
+document.getElementById('categoryFilter')
+    .addEventListener('change', updatePieCharts);
 </script>
 @endpush

@@ -13,4 +13,5 @@
 	<link href="{{ asset('master/css/styles.css') }}" rel="stylesheet">
 	<script src="{{ asset('master/js/html5shiv.js') }}"></script>
 	<script src="{{ asset('master/js/respond.min.js') }}"></script>
+    
 </head>
