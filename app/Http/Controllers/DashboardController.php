@@ -11,6 +11,7 @@ use Carbon\Carbon;
 use App\Exports\DashboardExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\Request; 
 
 class DashboardController extends Controller
 {
@@ -92,6 +93,65 @@ class DashboardController extends Controller
             'comparison'        => $comparison,
         ]);
     }
+
+    public function filterSummary(Request $request)
+    {
+    $month = $request->month;
+    $year  = $request->year;
+    $categoryId = $request->category;
+
+    /* ================= QUERY BASE ================= */
+    $saldoQuery = Saldo::query();
+    $pengeluaranQuery = Transaction::query();
+
+    if ($month) {
+        $saldoQuery->whereMonth('created_at', $month);
+        $pengeluaranQuery->whereMonth('created_at', $month);
+    }
+
+    if ($year) {
+        $saldoQuery->whereYear('created_at', $year);
+        $pengeluaranQuery->whereYear('created_at', $year);
+    }
+
+    if ($categoryId) {
+        $saldoQuery->where('category_id', $categoryId);
+    }
+
+    /* ================= HITUNG ================= */
+    $totalSaldo = $saldoQuery->sum('amount');
+    $totalPengeluaran = $pengeluaranQuery->sum('amount');
+
+    /* ================= PIE KOMPARASI ================= */
+    $comparison = [
+        ['name' => 'Pemasukan', 'y' => $totalSaldo],
+        ['name' => 'Pengeluaran', 'y' => $totalPengeluaran],
+    ];
+
+    /* ================= PIE SALDO PER KATEGORI ================= */
+    $saldoPerKategori = [];
+
+    $categories = Category::when($categoryId, fn($q) => $q->where('id', $categoryId))->get();
+
+    foreach ($categories as $category) {
+        $total = Saldo::where('category_id', $category->id)
+            ->when($month, fn($q) => $q->whereMonth('created_at', $month))
+            ->when($year, fn($q) => $q->whereYear('created_at', $year))
+            ->sum('amount');
+
+        if ($total > 0) {
+            $saldoPerKategori[] = [
+                'name' => $category->name,
+                'y'    => $total
+            ];
+        }
+    }
+
+    return response()->json([
+        'comparison'       => $comparison,
+        'saldoPerKategori' => $saldoPerKategori
+    ]);
+}
 
     /**
      * Export dashboard to Excel

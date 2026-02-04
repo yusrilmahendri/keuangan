@@ -72,10 +72,9 @@
                 <thead>
                     <tr>
                         <th>Kode Transaksi</th>
-                        <th>Kategori</th>
                         <th>Total Transaksi</th>
                         <th>Keterangan</th>
-                        <th>Item Transaksi</th>
+                        <th>Detail Keterangan</th>
                         <th>Tanggal & Waktu Transaksi</th>
                         <th>Tindakan</th>
                     </tr>
@@ -110,7 +109,6 @@
                 ajax: "{{ route('transactions.data') }}",
                 columns: [
                     {data: 'id'},
-                    {data: 'name'},
                     {data: 'amount'},
                     {data: 'description'},
                     {data: 'keterangan_detail'},

@@ -17,6 +17,7 @@ Route::get('/api/v1/saldos/category/{id}', [SaldoController::class, 'getByCatego
 Route::get('/api/v1/saldos/filter', [SaldoController::class, 'getFilteredSaldo'])->name('saldos.filter');
 Route::get('/api/v1/transactions', [TransactionsController::class, 'data'])->name('transactions.data');
 Route::get('/api/v1/categories', [CategoryController::class, 'data'])->name('categories.data');
+Route::get('/api/dashboard/summary', [DashboardController::class, 'filterSummary']);
 
 // Export Routes
 Route::get('/dashboard/export/excel', [DashboardController::class, 'exportExcel'])->name('dashboard.export.excel');
