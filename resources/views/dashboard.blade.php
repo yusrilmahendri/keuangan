@@ -66,7 +66,7 @@
                 <div class="card-body" style="padding: 20px;">
                     <div class="d-flex align-items-center mb-2">
                         <i class="fa fa-filter text-white me-2" style="font-size: 18px;"></i>
-                        <label for="categoryFilter" class="form-label text-white mb-0" style="font-weight: 600; font-size: 14px;">
+                        <label for="monthFilter" class="form-label text-white mb-0" style="font-weight: 600; font-size: 14px;">
                             Filter Kategori
                         </label>
                     </div>
