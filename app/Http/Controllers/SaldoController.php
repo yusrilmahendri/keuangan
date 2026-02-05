@@ -9,6 +9,7 @@ use App\Models\Category;
 use App\Exports\SaldoExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Storage;
 
 class SaldoController extends Controller
 {
@@ -81,6 +82,7 @@ class SaldoController extends Controller
             'description' => 'required|max:255',
             'periode_saldo' => 'required|date',
             'category_id' => 'required',
+            'nota_image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
         Saldo::create([
@@ -90,7 +92,6 @@ class SaldoController extends Controller
             'category_id' => $validatedData['category_id'],
             'nota_image' => $request->file('nota_image') ? $request->file('nota_image')->store('nota', 'public') : null,
         ]);
-
         return redirect()->route('saldos.index')->with('success', 'Saldo berhasil ditambahkan!');
     }
 
@@ -131,26 +132,46 @@ class SaldoController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
-    {
-        $validatedData = $request->validate([
-            'amount' => 'required',
-            'description' => 'required|max:255',
-            'periode_saldo' => 'required|date',
-            'category_id' => 'required',
-        ]);
+   public function update(Request $request, string $id)
+{
+    $validatedData = $request->validate([
+        'amount'        => 'required',
+        'description'   => 'required|max:255',
+        'periode_saldo' => 'required|date',
+        'category_id'   => 'required',
+        'nota_image'    => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+    ]);
 
-        $saldo = Saldo::findOrFail($id);
-        $saldo->update([
-            'amount' => $this->cleanRupiah($validatedData['amount']),
-            'description' => $validatedData['description'],
-            'periode_saldo' => $validatedData['periode_saldo'],
-            'category_id' => $validatedData['category_id'],
-            'nota_image' => $request->file('nota_image') ? $request->file('nota_image')->store('nota', 'public') : $saldo->nota_image,
-        ]);
+    $saldo = Saldo::findOrFail($id);
 
-        return redirect()->route('saldos.index')->with('info', 'Saldo berhasil diperbarui!');
+    // Default pakai file lama
+    $notaImagePath = $saldo->nota_image;
+
+    // Jika upload baru
+    if ($request->hasFile('nota_image')) {
+
+        // Hapus file lama jika ada
+        if ($saldo->nota_image && Storage::disk('public')->exists($saldo->nota_image)) {
+            Storage::disk('public')->delete($saldo->nota_image);
+        }
+
+        // Simpan file baru
+        $notaImagePath = $request->file('nota_image')
+            ->store('nota', 'public');
     }
+
+    $saldo->update([
+        'amount'        => $this->cleanRupiah($validatedData['amount']),
+        'description'   => $validatedData['description'],
+        'periode_saldo' => $validatedData['periode_saldo'],
+        'category_id'   => $validatedData['category_id'],
+        'nota_image'    => $notaImagePath,
+    ]);
+
+    return redirect()
+        ->route('saldos.index')
+        ->with('info', 'Saldo berhasil diperbarui!');
+}
 
     /**
      * Get total saldo by category

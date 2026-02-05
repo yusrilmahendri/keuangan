@@ -13,7 +13,7 @@
         <div class="panel-body">
             <div class="row">
                 <div class="col-lg-12">
-                    <form action="{{ route('saldos.update', $Saldo->id) }}" method="POST">
+                    <form action="{{ route('saldos.update', $Saldo->id) }}" method="POST" enctype="multipart/form-data">
 
                       @csrf
                       @method("PUT")
