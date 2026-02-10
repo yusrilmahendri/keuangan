@@ -1,22 +1,15 @@
-<a href="{{ route('transactions.edit', $model) }}" 
+<a href="{{ route('transactions.edit', $model) }}"
    class="btn btn-warning" style="margin-right: 5px; margin-bottom: 5px;">
   <img class="img-fluid" src="{{ asset('images/edit.png') }}" alt="">
   Edit
 </a>
 
-<a href="#" 
-   class="btn btn-danger delete-btn-{{ $model->id }}"
-   data-url="{{ route('transactions.destroy', $model) }}"
-   onclick="confirmDelete(event, '{{ route('transactions.destroy', $model) }}')"
-   style="margin-bottom: 5px;">
-  <i class="fa fa-trash"></i>
-  Hapus
-</a>
+
 
 <script>
 function confirmDelete(event, url) {
     event.preventDefault();
-    
+
     swal({
         title: 'Apakah Anda yakin?',
         text: "Data transaksi ini akan dihapus permanen!",
